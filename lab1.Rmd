@@ -1,0 +1,95 @@
+---
+title: "multi lab1"
+author: "kevin"
+date: "4/18/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## ex1
+```{r}
+lizard <- read.table("http://staff.ustc.edu.cn/~ynyang/vector/databook/T1-3.DAT")
+dimnames(lizard)[[2]] <- c("Mass","SVL","HLS")
+gender=c(1,0,1,1,0,1,0,1,0,1,0,1,0,0,0,0,1,0,0,0,1,1,0,1,1)
+```
+
+### a
+首先我们画散点图考察相关程度
+```{r}
+pairs(~Mass+SVL+HLS,data = lizard, main = "scatter plot matrix")
+```
+
+下面我们检查他们是否服从正态分布
+```{r}
+qqnorm(lizard$Mass,main = "Mass")
+qqline(lizard$Mass, col=2, lwd=2) 
+qqnorm(lizard$SVL,main = "SVL")
+qqline(lizard$SVL, col=2, lwd=2) 
+qqnorm(lizard$HLS,main = "HLS")
+qqline(lizard$HLS, col=2, lwd=2) 
+```
+于是我们可以认为三个指标近似服从正态分布
+
+### b
+```{r}
+plot(lizard$Mass,lizard$SVL, col = gender+1)
+legend("topleft", legend = c("male","female"),pch = c(1,1), col = c(1,2))
+```
+### c
+```{r}
+pairs(~Mass+SVL+HLS,data = lizard, main = "scatter plot matrix", col = gender+1)
+```
+```{r}
+plot(lizard$Mass,pch=16, col = gender+1)
+plot(lizard$SVL,pch=16, col = gender+1)
+plot(lizard$HLS,pch=16, col = gender+1)
+```
+观察发现三个变量female的指标均偏低, male均偏高, 且HLS较好的区分了性别
+female的HLS指标值的最大值小于male的最小值
+
+### d
+```{r}
+library(rgl)
+plot3d(lizard[,1:3], col = gender+1)
+```
+通过观察发现HLS-Mass方向与HLS-SVL方向上均较好的区分了性别
+
+
+
+## ex2
+我们首先生成球面上的均匀分布
+
+```{r}
+n <- 10 #dim
+N <- 1000 # sample size
+X <- matrix(rnorm(n*N),N,n)
+r2 <- apply(X^2,1,sum)
+r <- sqrt(r2)
+u <- X/r
+```
+
+
+```{r}
+plot(u[,1])
+plot(u[,1:2])
+```
+一维投影分布
+```{r}
+unif <- runif(1000,-1,1)
+boxplot(u[,1])
+qqplot(u[,1], unif)
+```
+则我们可以认为一维投影服从均匀分布
+
+二维投影分布
+```{r}
+library(MASS)
+k <- kde2d(lizard[,1],lizard[,2], n=100) #n: x,y轴划分区间的个数
+image(k, xlab="v1", ylab="v2" )
+contour(k, add = TRUE, drawlabels = FALSE,nlevels=6)
+persp(k, xlab="x", ylab="y",zlab="Prob. density",theta=30 )
+```
+
